@@ -1,171 +1,67 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pandas as pd
-
-
-# In[2]:
-
-
-pd.__version__
-
-
-# In[3]:
-
-
-url = "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz"
-
-
-# In[5]:
-
-
-df = pd.read_csv(url, nrows = 100)
-
-
-# In[6]:
-
-
-len(df)
-
-
-# In[7]:
-
-
-df.head()
-
-
-# In[8]:
-
-
-taxi_zone = pd.read_csv("https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv")
-
-
-# In[9]:
-
-
-len(taxi_zone)
-
-
-# In[10]:
-
-
-taxi_zone.head()
-
-
-# In[11]:
-
-
-print(pd.io.sql.get_schema(df, 'green_taxi_data'))
-
-
-# In[12]:
-
-
-df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
-df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
-
-
-# In[13]:
-
-
-print(pd.io.sql.get_schema(df, 'green_taxi_data'))
-
-
-# In[14]:
-
-
-get_ipython().system('pip install sqlalchemy')
-
-
-# In[16]:
-
-
-get_ipython().system('pip install psycopg2')
-
-
-# In[17]:
-
-
-from sqlalchemy import create_engine
-
-engine = create_engine('postgresql://root:root@localhost:5432/ny_taxi')
-
-engine.connect()
-
-
-# In[18]:
-
-
-print(pd.io.sql.get_schema(df, name="green_taxi_data", con=engine))
-
-
-# In[19]:
-
-
-df_iter = pd.read_csv(url, iterator = True, chunksize = 100000)
-
-
-# In[20]:
-
-
-df_iter
-
-
-# In[21]:
-
-
-df = next(df_iter)
-
-
-# In[22]:
-
-
-len(df)
-
-
-# In[23]:
-
-
-df.head(n=0)
-
-
-# In[24]:
-
-
-df.head(n=0).to_sql(name = 'green_taxi_data', con = engine, if_exists='replace')
-
-
-# In[25]:
-
-
-# Loading in the data iteratively using a for loop.
-
 from time import time
+from sqlalchemy import create_engine
+import argparse
 
-for df in df_iter:
-    t_start = time()
+
+def main(params):
+    user = params.user
+    password = params.password
+    host = params.host
+    port = params.port
+    db = params.db
+    table_name = params.table_name[0]
+    table_name1 = params.table_name[1]
+    url = params.url[0]
+    url1 = params.url[1]
+    
+    engine = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{db}")
+
+    df_iter = pd.read_csv(url, iterator = True, chunksize = 100000)
+    df = next(df_iter)
 
     df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
     df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
 
-    df.to_sql(name = 'green_taxi_data', con = engine, if_exists='append')
+    df.head(n=0).to_sql(name = table_name, con = engine, if_exists='replace')
+    df.to_sql(name = table_name, con = engine, if_exists='append')
 
-    t_end = time()
+    for df in df_iter:
+        t_start = time()
+        
+        df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
+        df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
 
-    print(f'Inserted a new chunk. time taken(ins s) - {round(t_end - t_start, 2)}')
+        df.to_sql(name = table_name, con = engine, if_exists='append')
+        
+        t_end = time()
+        
+        print(f'Inserted a new chunk. Time taken (in s) - {round(t_end - t_start, 2)}')
 
+    taxi_zone = pd.read_csv(url1)
 
-# In[27]:
+    taxi_zone.to_sql(name = table_name1, con = engine, if_exists='replace')
+    
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description = "Ingest CSV data to Postgres")
 
-get_ipython().system('jupyter nbconvert --to script ingest_data.py')
+    # user
+    # password
+    # host
+    # port
+    # database name
+    # table name
+    # url of the csv
 
+    parser.add_argument('--user', help="user name for postgres")
+    parser.add_argument('--password', help="password for postgres")
+    parser.add_argument('--host', help="host for postgres")
+    parser.add_argument('--port', help="port for postgres")
+    parser.add_argument('--db', help="database name for postgres")
+    parser.add_argument('--table_name', nargs = 2, help="name of the table where we will write the results to")
+    parser.add_argument('--url', nargs = 2, help="url of the CSV")
 
-# In[ ]:
+    args = parser.parse_args()
 
-
-
-
+    main(args)

@@ -1,0 +1,75 @@
+
+> "docker build -t test:pandas ." is used to build a new Docker image
+> docker images command to check the list of images available on your machine, and use the docker rmi command to remove an image if you want to build a new one.
+> you can use the --no-cache option with the docker build command to force a new build and ignore the cache. docker build --no-cache -t test:pandas .
+
+
+> Postgres image :
+
+winpty docker run -it \
+    -e POSTGRES_USER="root" \
+    -e POSTGRES_PASSWORD="root" \
+    -e POSTGRES_DB="ny_taxi" \
+    -v D://Data_Engg//DE-ZoomCamp2024//week_1//ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -p 5432:5432 \
+    postgres:13
+
+
+> postgres Db connect " winpty pgcli -h localhost -p 5432 -u root -d ny_taxi "
+
+> docker to install a pgAdmin container
+
+winpty docker run -it \
+    -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+    -e PGADMIN_DEFAULT_PASSWORD="root" \
+    -p 8080:80 \
+    dpage/pgadmin4
+
+
+> For pg-network
+
+winpty docker run -it \
+    -e POSTGRES_USER="root" \
+    -e POSTGRES_PASSWORD="root" \
+    -e POSTGRES_DB="ny_taxi" \
+    -v D://Data_Engg//DE-ZoomCamp2024//week_1//ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -p 5432:5432 \
+    --network=pg-network \
+    --name pg-database \
+    postgres:13
+
+> for pg-network pgadmin
+
+winpty docker run -it \
+    -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+    -e PGADMIN_DEFAULT_PASSWORD="root" \
+    -p 8080:80 \
+    --network=pg-network \
+    --name pgadmin \
+    dpage/pgadmin4
+
+
+> Run the following command to successfully execute the ingest_data.py script and upload the data into postgres.
+
+python ingest_data.py \
+    --user=root \
+    --password=root \
+    --host=localhost \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name green_taxi_data taxi_zone \
+    --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
+
+
+> Then we need to run the following docker build command - docker build -t taxi_ingest:v001 .
+
+> winpty docker run -it \
+    --network=pg-network \
+    taxi_ingest:v001 \
+    --user=root \
+    --password=root \
+    --host=pg-database \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name green_taxi_data taxi_zone \
+    --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
