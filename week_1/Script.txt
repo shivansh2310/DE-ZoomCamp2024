@@ -73,3 +73,26 @@ python ingest_data.py \
     --db=ny_taxi \
     --table_name green_taxi_data taxi_zone \
     --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
+
+> Open your terminal.
+To stop all running containers, use the following command:
+
+" docker stop $(docker ps -a -q) "
+
+In this command, ‘docker ps -a -q’ lists all containers, and ‘docker stop’ halts them.
+
+If you wish to remove all stopped containers, use:
+
+" docker rm $(docker ps -a -q) "
+
+
+> $ git rm --cached giant_file
+# Stage our giant file for removal, but leave it on disk
+
+git commit --amend -CHEAD
+# Amend the previous commit with your change
+# Simply making a new commit won't work, as you need
+# to remove the file from the unpushed history as well
+
+git push
+# Push our rewritten, smaller commit
