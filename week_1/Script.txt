@@ -10,7 +10,7 @@ winpty docker run -it \
     -e POSTGRES_USER="root" \
     -e POSTGRES_PASSWORD="root" \
     -e POSTGRES_DB="ny_taxi" \
-    -v D://Data_Engg//DE-ZoomCamp2024//week_1//ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -v D://Data_Engg//DE-ZoomCamp2024//week_1//ny_new_data:/var/lib/postgresql/data \
     -p 5432:5432 \
     postgres:13
 
@@ -32,9 +32,9 @@ winpty docker run -it \
     -e POSTGRES_USER="root" \
     -e POSTGRES_PASSWORD="root" \
     -e POSTGRES_DB="ny_taxi" \
-    -v D://Data_Engg//DE-ZoomCamp2024//week_1//ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -v D://Data_Engg//DE-ZoomCamp2024//week_1//ny_new_data:/var/lib/postgresql/data \
     -p 5432:5432 \
-    --network=pg-network \
+    --network=pgp-network \
     --name pg-database \
     postgres:13
 
@@ -44,7 +44,7 @@ winpty docker run -it \
     -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
     -e PGADMIN_DEFAULT_PASSWORD="root" \
     -p 8080:80 \
-    --network=pg-network \
+    --network=pgp-network \
     --name pgadmin \
     dpage/pgadmin4
 
@@ -58,13 +58,13 @@ python ingest_data.py \
     --port=5432 \
     --db=ny_taxi \
     --table_name green_taxi_data taxi_zone \
-    --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
+    --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-09.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
 
 
 > Then we need to run the following docker build command - docker build -t taxi_ingest:v001 .
 
 > winpty docker run -it \
-    --network=pg-network \
+    --network=pgp-network \
     taxi_ingest:v001 \
     --user=root \
     --password=root \
@@ -72,7 +72,7 @@ python ingest_data.py \
     --port=5432 \
     --db=ny_taxi \
     --table_name green_taxi_data taxi_zone \
-    --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-01.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
+    --url "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-09.csv.gz" "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
 
 > Open your terminal.
 To stop all running containers, use the following command:
