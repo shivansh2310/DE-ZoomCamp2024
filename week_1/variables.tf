@@ -3,7 +3,7 @@ locals {
 }
 
 variable "project" {
-  description = "data-axiom-412014"
+  description = "<Your Project ID>"
 }
 
 variable "region" {
