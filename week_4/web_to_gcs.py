@@ -46,10 +46,12 @@ def web_to_gcs(service, year):
             continue
         
         # Convert CSV file to Parquet
-        csv = pd.read_csv(file_path)
+        df = pd.read_csv(file_path)
+        change_types = {"PUlocationID": "Int64", "DOlocationID": "Int64", "SR_Flag": "Int64"}
+        df = df.astype(change_types)
         parquet_file_name = file_name.replace(".csv.gz", ".parquet")
         parquet_file_path = os.path.join(LOCAL_DIR, parquet_file_name)
-        table = pa.Table.from_pandas(csv)
+        table = pa.Table.from_pandas(df)
         pq.write_table(table, parquet_file_path)
             
         # Upload Parquet file to Google Cloud Storage
@@ -61,8 +63,8 @@ def web_to_gcs(service, year):
 
 
 web_to_gcs("fhv", 2019)   
-web_to_gcs("green", 2019)   
-web_to_gcs("green", 2020)   
-web_to_gcs("yellow", 2019)   
-web_to_gcs("yellow", 2020)   
+# web_to_gcs("green", 2019)   
+# web_to_gcs("green", 2020)   
+# web_to_gcs("yellow", 2019)   
+# web_to_gcs("yellow", 2020)   
         
