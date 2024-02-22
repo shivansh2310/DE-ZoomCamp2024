@@ -118,7 +118,7 @@ Create a dashboard with some tiles that you find interesting to explore the data
 - FHV and Green
 
 
-![Trips per month](/img/DE-HW.PNG)
+![Trips per month](./img/DE-HW.PNG)
 
 ```
 Green
